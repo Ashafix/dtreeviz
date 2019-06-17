@@ -1,14 +1,6 @@
-import IPython, graphviz, re
-from io import StringIO
-from IPython.display import Image
 import numpy as np
 import pandas as pd
-import math
-from sklearn import tree
-from sklearn.datasets import load_boston, load_iris
 from collections import defaultdict, Sequence
-import string
-import re
 from typing import Mapping, List, Tuple
 from numbers import Number
 from sklearn.utils import compute_class_weight
@@ -100,7 +92,7 @@ class ShadowDecTree:
         return self.tree_model.tree_.n_classes[0]
 
     def nnodes(self) -> int:
-        "Return total nodes in the tree"
+        """Return total nodes in the tree"""
         return self.tree_model.tree_.node_count
 
     def leaf_sample_counts(self) -> List[int]:
@@ -119,7 +111,7 @@ class ShadowDecTree:
             overall_feature_range = (np.min(X_feature), np.max(X_feature))
             # print(f"range {overall_feature_range}")
             r = overall_feature_range[1] - overall_feature_range[0]
-            binwidth = r / nbins
+
             bins = np.linspace(overall_feature_range[0],
                                overall_feature_range[1], nbins+1)
             # bins = np.arange(overall_feature_range[0],

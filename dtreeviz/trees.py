@@ -1,4 +1,5 @@
 from pathlib import Path
+import graphviz
 from graphviz.backend import run, view
 import matplotlib.pyplot as plt
 from dtreeviz.shadow import *
@@ -11,7 +12,8 @@ from colour import Color, rgb2hex
 from typing import Mapping, List
 from dtreeviz.utils import inline_svg_images, myround
 from dtreeviz.shadow import ShadowDecTree, ShadowDecTreeNode
-from dtreeviz.colors import adjust_colors
+from dtreeviz.colors import adjust_colors, get_class_colors
+from sklearn import tree
 
 # How many bins should we have based upon number of classes
 NUM_BINS = [0, 0, 10, 9, 8, 6, 6, 6, 5, 5, 5]
@@ -203,7 +205,7 @@ def rtreeviz_bivar_3D(ax, X_train, y_train, max_depth, feature_names, target_nam
                       azim=0, elev=0, dist=7,
                       show={'title'},
                       colors=None,
-                      n_colors_in_map = 100
+                      n_colors_in_map=100
                       ) -> tree.DecisionTreeClassifier:
     """
     Show 3D feature space for bivariate regression tree. X_train can
@@ -285,7 +287,7 @@ def ctreeviz_univar(ax, x_train, y_train, max_depth, feature_name, class_names,
     overall_feature_range = (np.min(x_train), np.max(x_train))
     class_values = shadow_tree.unique_target_values
 
-    color_values = colors['classes'][n_classes]
+    color_values = get_class_colors(max(class_values), colors['classes'])
     color_map = {v: color_values[i] for i, v in enumerate(class_values)}
     X_colors = [color_map[cl] for cl in class_values]
 
@@ -388,7 +390,7 @@ def ctreeviz_bivar(ax, X_train, y_train, max_depth, feature_names, class_names,
     n_classes = shadow_tree.nclasses()
     class_values = shadow_tree.unique_target_values
 
-    color_values = colors['classes'][n_classes]
+    color_values = get_class_colors(n_classes, colors['classes'])
     color_map = {v: color_values[i] for i, v in enumerate(class_values)}
 
     if 'splits' in show:
@@ -680,11 +682,11 @@ def dtreeviz(tree_model: (tree.DecisionTreeRegressor, tree.DecisionTreeClassifie
         highlight_path = [n.id for n in path]
 
     n_classes = shadow_tree.nclasses()
-    color_values = colors['classes'][n_classes]
 
     # Fix the mapping from target value to color for entire tree
     if shadow_tree.isclassifier():
         class_values = shadow_tree.unique_target_values
+        color_values = get_class_colors(len(class_values), colors['classes'])
         color_map = {v: color_values[i] for i, v in enumerate(class_values)}
         draw_legend(shadow_tree, target_name, f"{tmp}/legend_{os.getpid()}.svg", colors=colors)
 
@@ -1092,7 +1094,7 @@ def draw_legend(shadow_tree, target_name, filename, colors=None):
     n_classes = shadow_tree.nclasses()
     class_values = shadow_tree.unique_target_values
     class_names = shadow_tree.class_names
-    color_values = colors['classes'][n_classes]
+    color_values = get_class_colors(n_classes, colors['classes'])
     color_map = {v:color_values[i] for i,v in enumerate(class_values)}
 
     boxes = []
@@ -1181,7 +1183,10 @@ def prop_size(n, counts, output_range = (0.00, 0.3)):
 
 
 def get_num_bins(histtype, n_classes):
-    bins = NUM_BINS[n_classes]
+    if n_classes < len(NUM_BINS):
+        bins = NUM_BINS[n_classes]
+    else:
+        bins = 4
     if histtype == 'barstacked':
         bins *= 2
     return bins

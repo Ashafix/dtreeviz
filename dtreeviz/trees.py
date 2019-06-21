@@ -1,8 +1,9 @@
+import numpy as np
+import pandas as pd
 from pathlib import Path
 import graphviz
 from graphviz.backend import run, view
 import matplotlib.pyplot as plt
-from dtreeviz.shadow import *
 from numbers import Number
 import matplotlib.patches as patches
 import tempfile
@@ -52,8 +53,7 @@ class DTreeViz:
         would fail with errors. See https://github.com/parrt/dtreeviz/issues/4
         """
         path = Path(filename)
-        if not path.parent.exists:
-            os.makedirs(path.parent)
+        os.makedirs(path.parent, exist_ok=True)
 
         g = graphviz.Source(self.dot, format='svg')
         dotfilename = g.save(directory=path.parent.as_posix(), filename=path.stem)

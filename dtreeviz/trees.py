@@ -66,7 +66,6 @@ class DTreeViz:
 
         # Gen .svg file from .dot but output .svg has image refs to other files
         cmd = ["dot", f"-T{format}", "-o", filename, dotfilename]
-        # print(' '.join(cmd))
         run(cmd, capture_output=True, check=True, quiet=False)
 
         if filename.endswith(".svg"):
@@ -153,7 +152,7 @@ def rtreeviz_bivar_heatmap(ax, X_train, y_train, max_depth, feature_names,
     Show tesselated 2D feature space for bivariate regression tree. X_train can
     have lots of features but features lists indexes of 2 features to train tree with.
     """
-    if isinstance(X_train,pd.DataFrame):
+    if isinstance(X_train, pd.DataFrame):
         X_train = X_train.values
     if isinstance(y_train, pd.Series):
         y_train = y_train.values
@@ -226,8 +225,6 @@ def rtreeviz_bivar_3D(ax, X_train, y_train, max_depth, feature_names, target_nam
         y = np.linspace(bbox[1], bbox[3], 2)
         xx, yy = np.meshgrid(x, y)
         z = np.full(xx.shape, node.prediction())
-        # print(f"{node.prediction()}->{int(((node.prediction()-y_lim[0])/y_range)*(n_colors_in_map-1))}, lim {y_lim}")
-        # print(f"{color_map[int(((node.prediction()-y_lim[0])/y_range)*(n_colors_in_map-1))]}")
         ax.plot_surface(xx, yy, z, alpha=.85, shade=False,
                         color=color_map[int(((node.prediction()-y_lim[0])/y_range)*(n_colors_in_map-1))],
                         edgecolor=colors['edge'], lw=.3)
@@ -276,7 +273,6 @@ def ctreeviz_univar(ax, x_train, y_train, max_depth, feature_name, class_names,
 
     colors = adjust_colors(colors)
 
-    #    ax.set_facecolor('#F9F9F9')
     ct = tree.DecisionTreeClassifier(max_depth=max_depth)
     ct.fit(x_train.reshape(-1, 1), y_train)
 
@@ -291,7 +287,7 @@ def ctreeviz_univar(ax, x_train, y_train, max_depth, feature_name, class_names,
     color_map = {v: color_values[i] for i, v in enumerate(class_values)}
     X_colors = [color_map[cl] for cl in class_values]
 
-    ax.set_xlabel(f"{feature_name}", fontsize=fontsize, fontname=fontname,
+    ax.set_xlabel(feature_name, fontsize=fontsize, fontname=fontname,
                   color=colors['axis_label'])
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -372,7 +368,7 @@ def ctreeviz_bivar(ax, X_train, y_train, max_depth, feature_names, class_names,
     Show tesselated 2D feature space for bivariate classification tree. X_train can
     have lots of features but features lists indexes of 2 features to train tree with.
     """
-    if isinstance(X_train,pd.DataFrame):
+    if isinstance(X_train, pd.DataFrame):
         X_train = X_train.values
     if isinstance(y_train, pd.Series):
         y_train = y_train.values
@@ -663,16 +659,14 @@ def dtreeviz(tree_model: (tree.DecisionTreeRegressor, tree.DecisionTreeClassifie
     if orientation=="TD":
         ranksep = ".2"
         nodesep = "0.1"
+    elif fancy:
+        ranksep = ".22"
+        nodesep = "0.1"
     else:
-        if fancy:
-            ranksep = ".22"
-            nodesep = "0.1"
-        else:
-            ranksep = ".05"
-            nodesep = "0.09"
+        ranksep = ".05"
+        nodesep = "0.09"
 
     tmp = tempfile.gettempdir()
-    # tmp = "/tmp"
 
     shadow_tree = ShadowDecTree(tree_model, X_train, y_train,
                                 feature_names=feature_names, class_names=class_names)
@@ -882,8 +876,6 @@ def class_split_viz(node: ShadowDecTreeNode,
         X_colors = [colors[cl] for cl in class_values]
 
         bins = np.linspace(start=overall_feature_range[0], stop=overall_feature_range[1], num=nbins, endpoint=True)
-        # print(f"\nrange: {overall_feature_range}, r={r}, nbins={nbins}, len(bins)={len(bins)}, binwidth={binwidth}\n{bins}")
-        # bins[-1] = overall_feature_range[1] # make sure rounding doesn't kill last value on right
         hist, bins, barcontainers = ax.hist(X_hist,
                                             color=X_colors,
                                             align='mid',
@@ -937,8 +929,6 @@ def class_leaf_viz(node : ShadowDecTreeNode,
                    graph_colors=None):
 
     graph_colors = adjust_colors(graph_colors)
-    # size = prop_size(node.nsamples(), counts=node.shadow_tree.leaf_sample_counts(),
-    #                  output_range=(.2, 1.5))
 
     minsize = .15
     maxsize = 1.3
@@ -1029,7 +1019,6 @@ def regr_split_viz(node: ShadowDecTreeNode,
     if highlight_node:
         wedge(ax, X[node.feature()], color=colors['highlight'])
 
-    #plt.tight_layout()
     if filename is not None:
         plt.savefig(filename, bbox_inches='tight', pad_inches=0)
         plt.close()
@@ -1064,7 +1053,6 @@ def regr_leaf_viz(node : ShadowDecTreeNode,
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_linewidth(.3)
     ax.set_xticks([])
-    # ax.set_yticks(y_range)
 
     ticklabelpad = plt.rcParams['xtick.major.pad']
     ax.annotate(f"{target_name}={myround(m,precision)}\nn={len(y)}",
@@ -1083,7 +1071,6 @@ def regr_leaf_viz(node : ShadowDecTreeNode,
     ax.scatter(X, y, s=5, c=colors['scatter_marker'], alpha=alpha, lw=.3)
     ax.plot([0,len(node.samples())],[m,m],'--', color=colors['split_line'], linewidth=1)
 
-    #plt.tight_layout()
     if filename is not None:
         plt.savefig(filename, bbox_inches='tight', pad_inches=0)
         plt.close()
@@ -1144,8 +1131,6 @@ def draw_piechart(counts, size, colors, filename, label=None, fontname="Arial", 
     tweak = size * .01
     fig, ax = plt.subplots(1, 1, figsize=(size, size))
     ax.axis('equal')
-    # ax.set_xlim(0 - tweak, size + tweak)
-    # ax.set_ylim(0 - tweak, size + tweak)
     ax.set_xlim(0, size-10*tweak)
     ax.set_ylim(0, size-10*tweak)
     # frame=True needed for some reason to fit pie properly (ugh)
@@ -1165,7 +1150,6 @@ def draw_piechart(counts, size, colors, filename, label=None, fontname="Arial", 
                 verticalalignment='top',
                 fontsize=9, color=graph_colors['text'], fontname=fontname)
 
-    # plt.tight_layout()
     plt.savefig(filename, bbox_inches='tight', pad_inches=0)
     plt.close()
 
